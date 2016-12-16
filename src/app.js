@@ -1,27 +1,28 @@
-const cards = (state, action) => {
-  switch (action.type) {
-    case 'ADD_CARD':
-      let newCard = Object.assign({}, action.data, {
-        score: 1,
-        id: +new Date
-      });
-      return state.concat([newCard]);
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { createStore, combineReducers } from 'redux';
+import { Provider } from 'react-redux';
+import * as reducers from './reducers';
+import App from './components/app';
+import Sidebar from './components/sidebar';
+import { Router, Route, browserHistory } from 'react-router';
+import { syncHistoryWithStore, routerReducer } from 'react-router-redux';
 
-    default:
-      return state || [];
-  }
-};
+reducers.routing = routerReducer;
 
-const store = Redux.createStore(Redux.combineReducers({
-  cards
-}));
+const store = createStore(combineReducers(reducers));
+const history = syncHistoryWithStore(browserHistory, store);
 
-const App = (props) => {
-  return (
-    <div className="app">
-      {props.children}
-    </div>
-  );
-};
+function run() {
+  ReactDOM.render((
+    <Provider store={store}>
+      <Router history={history}>
+        <Route path="/" component={App}></Route>
+      </Router>
+    </Provider>
+  ), document.getElementById('root'));
+}
 
-ReactDOM.render(<App>Hello React</App>, document.getElementById('root'));
+run();
+
+store.subscribe(run);
